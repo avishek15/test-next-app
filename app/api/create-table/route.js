@@ -1,9 +1,9 @@
-import { createSessionClient } from "@/appwrite-services/appwrite";
+import { createAdminClient } from "@/appwrite-services/appwrite";
 import { NextResponse } from "next/server";
 
 export async function GET() {
   try {
-    const { database } = createSessionClient();
+    const { database } = createAdminClient();
     console.log(database);
     return NextResponse.json({}, { status: 200 });
   } catch (error) {
