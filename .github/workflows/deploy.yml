@@ -18,11 +18,11 @@ jobs:
         with:
           node-version: "22"
 
-      - name: Install dependencies
-        run: npm install
+      # - name: Install dependencies
+      #   run: npm install
 
-      - name: Run build
-        run: npm run build
+      # - name: Run build
+      #   run: npm run build
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v1
@@ -38,7 +38,7 @@ jobs:
         run: |
           echo "$SSH_PRIVATE_KEY" > id_rsa
           chmod 600 id_rsa
-          ssh-agent bash -c 'ssh-add id_rsa; docker save nextssr-app | gzip | ssh -o StrictHostKeyChecking=no $SSH_USER@$SERVER_IP "docker load && docker run -d --restart unless-stopped -p 3000:3000 nextssr-app"'
+          ssh-agent bash -c 'ssh-add id_rsa; ssh -o StrictHostKeyChecking=no $SSH_USER@$SERVER_IP "docker stop \$(docker ps -q --filter ancestor=nextssr-app) || true && docker rm \$(docker ps -aq --filter ancestor=nextssr-app) || true && docker rmi nextssr-app || true && docker load && docker run -d --restart unless-stopped -p 3000:3000 nextssr-app"'
           rm -f id_rsa
 
       - name: Test deployment
