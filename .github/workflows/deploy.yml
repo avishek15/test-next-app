@@ -13,10 +13,10 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v2
-        with:
-          node-version: "22"
+      # - name: Setup Node.js
+      #   uses: actions/setup-node@v2
+      #   with:
+      #     node-version: "22"
 
       # - name: Install dependencies
       #   run: npm install
@@ -28,7 +28,7 @@ jobs:
         uses: docker/setup-buildx-action@v1
 
       - name: Build Docker image for ARM64
-        run: docker buildx build --platform linux/arm64 -t nextssr-app . --load
+        run: docker buildx build --platform linux/arm64 -t nextssr-app:latest . --load
 
       - name: Deploy to OCI ARM instance
         env:
@@ -38,7 +38,7 @@ jobs:
         run: |
           echo "$SSH_PRIVATE_KEY" > id_rsa
           chmod 600 id_rsa
-          ssh-agent bash -c 'ssh-add id_rsa; ssh -o StrictHostKeyChecking=no $SSH_USER@$SERVER_IP "docker stop \$(docker ps -q --filter ancestor=nextssr-app) || true && docker rm \$(docker ps -aq --filter ancestor=nextssr-app) || true && docker rmi nextssr-app || true && docker load && docker run -d --restart unless-stopped -p 3000:3000 nextssr-app"'
+          ssh-agent bash -c 'ssh-add id_rsa; ssh -o StrictHostKeyChecking=no $SSH_USER@$SERVER_IP "docker stop nextssr-app || true && docker rm nextssr-app || true && docker rmi nextssr-app:latest || true && docker load && docker run -d --name nextssr-app --restart unless-stopped -p 3000:3000 nextssr-app:latest"'
           rm -f id_rsa
 
       - name: Test deployment
