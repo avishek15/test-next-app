@@ -43,4 +43,4 @@ jobs:
 
       - name: Test deployment
         run: |
-          curl -f http://$SERVER_IP:3000 || exit 1
+          curl -f "http://$SERVER_IP:3000" || exit 1
