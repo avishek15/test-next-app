@@ -1,0 +1,43 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: "22"
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Run build
+        run: npm run build
+
+      - name: Build Docker image
+        run: docker build -t nextssr-app .
+
+      - name: Deploy to OCI ARM instance
+        env:
+          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+          SSH_USER: ${{ secrets.SSH_USER }}
+          SERVER_IP: ${{ secrets.SERVER_IP }}
+        run: |
+          echo "$SSH_PRIVATE_KEY" > id_rsa
+          chmod 600 id_rsa
+          ssh-agent bash -c 'ssh-add id_rsa; docker save nextssr-app | gzip | ssh -o StrictHostKeyChecking=no $SSH_USER@$SERVER_IP "docker load && docker run -d --restart unless-stopped -p 3000:3000 nextssr-app"'
+          rm -f id_rsa
+
+      - name: Test deployment
+        run: |
+          curl -f http://$SERVER_IP:3000 || exit 1
