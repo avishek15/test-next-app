@@ -1,19 +1,14 @@
 "use server";
 import { Client, Account, Databases } from "node-appwrite";
-import { cookies } from "next/headers";
-import { session_name } from "../utils/constants";
 
-export async function createSessionClient() {
+const createSessionClient = async (session) => {
   const client = new Client()
     .setEndpoint(process.env.APPWRITE_ENDPOINT)
     .setProject(process.env.APPWRITE_PROJECT_ID);
 
-  const session = cookies().get(session_name);
-  if (!session || !session.value) {
-    throw new Error("No session");
+  if (session) {
+    client.setSession(session);
   }
-
-  client.setSession(session.value);
 
   return {
     get account() {
@@ -23,9 +18,9 @@ export async function createSessionClient() {
       return new Databases(client);
     },
   };
-}
+};
 
-export async function createAdminClient() {
+const createAdminClient = async () => {
   const client = new Client();
   if (!process.env.APPWRITE_ENDPOINT) {
     throw new Error("Environment variable APPWRITE_ENDPOINT is not defined");
@@ -51,4 +46,6 @@ export async function createAdminClient() {
       return new Databases(client);
     },
   };
-}
+};
+
+export { createAdminClient, createSessionClient };
