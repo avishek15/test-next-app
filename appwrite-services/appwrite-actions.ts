@@ -112,7 +112,9 @@ export async function login(state: unknown, formData: FormData) {
     ) {
       return {
         success: false,
-        errors: { email: [error.response.message] },
+        errors: {
+          email: ["Invalid Credentials. Please check email and password."],
+        },
       };
     }
   }

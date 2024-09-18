@@ -56,11 +56,11 @@ const Login = () => {
           {/* {errors.password && (
             <p className="text-red-500 text-xs italic">{errors.password}</p>
           )} */}
-          {state?.errors?.password && (
+          {/* {state?.errors?.password && (
             <p className="text-red-500 text-xs italic">
               {state.errors.password}
             </p>
-          )}
+          )} */}
         </div>
 
         <div className="flex items-center justify-between">
