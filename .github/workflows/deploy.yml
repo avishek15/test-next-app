@@ -20,14 +20,16 @@ jobs:
           echo "$SSH_PRIVATE_KEY" > id_rsa
           chmod 600 id_rsa
           ssh-agent bash -c 'ssh-add id_rsa; ssh -o StrictHostKeyChecking=no $SSH_USER@$SERVER_IP "
-            if docker ps -a --filter "name=nextssr-app" | grep -q nextssr-app; then
+            if docker ps -a --filter \"name=nextssr-app\" | grep -q nextssr-app; then
               docker stop nextssr-app || true && docker rm nextssr-app || true
             fi
-            if [ -d /tmp/nextssr-app ]; then
-              rm -rf /tmp/nextssr-app
+            if [ ! -d /tmp/nextssr-app ]; then
+              git clone https://github.com/$GITHUB_REPOSITORY.git /tmp/nextssr-app
+              cd /tmp/nextssr-app
+            else
+              cd /tmp/nextssr-app
+              git pull
             fi
-            git clone https://github.com/$GITHUB_REPOSITORY.git /tmp/nextssr-app
-            cd /tmp/nextssr-app
             cp ~/appwrite/.env.local .
             docker buildx build --platform linux/arm64 -t nextssr-app:latest . --load
             docker run -d --name nextssr-app --restart unless-stopped -p 3000:3000 nextssr-app:latest
